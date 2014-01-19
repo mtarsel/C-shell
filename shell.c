@@ -22,7 +22,7 @@ void printCWD(){
     if (getcwd(cwd, sizeof(cwd)) == NULL){
 	perror("getcwd() ain't workin dudeee");
     }else{
-	printf("\ncurrent working directory: %s \n", cwd);
+	printf("%s", cwd);
  
     }
 }
