@@ -92,6 +92,10 @@ main (int argc, char **argv)
       free(cmdLine);
       continue;
     }
+
+
+    execvp(com->command, com->VarList);
+
     /*com->command tells the command name of com*/
     if (isBuiltInCommand(com->command) == EXIT){
       exit(1);
