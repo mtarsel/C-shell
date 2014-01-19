@@ -52,12 +52,7 @@ main (int argc, char **argv)
   
   char * cmdLine;
   parseInfo *info; /*info stores all the information returned by parser.*/
-<<<<<<< HEAD
   struct commandType *com; /*com stores command name and Arg list for one command.*/
-=======
-  struct commandType *com; /*com stores command name and Arg list for one
-command.*/
->>>>>>> 70afa7280338067a5152c5e1a71b75a5adb873fb
 
 #ifdef UNIX
   
