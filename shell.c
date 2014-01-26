@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 enum
-BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT,JOBS};
+BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY};
 
 /*prints current working directory*/
 void printCWD(){
@@ -41,6 +41,15 @@ isBuiltInCommand(char * cmd){
   if ( strncmp(cmd, "exit", strlen("exit")) == 0){
     return EXIT;
   }
+  if ( strncmp(cmd, "jobs", strlen("jobs")) == 0){
+    return JOBS;
+  }
+  if ( strncmp(cmd, "cd", strlen("cd")) == 0){
+    return CD;
+  }
+  if ( strncmp(cmd, "history", strlen("history")) == 0){
+    return HISTORY;
+  }
   return NO_SUCH_BUILTIN;
 }
 
@@ -55,7 +64,6 @@ main (int argc, char **argv)
   struct commandType *com; /*com stores command name and Arg list for one command.*/
 
 #ifdef UNIX
-  
     fprintf(stdout, "This is the UNIX version\n");
 #endif
 
@@ -100,16 +108,28 @@ main (int argc, char **argv)
     if (isBuiltInCommand(com->command) == EXIT){
       exit(1);
     }
-  
+    
+    if (isBuiltInCommand(com->command) == JOBS){
+	system("ps -aux | more");
+    }
+    
+    if (isBuiltInCommand(com->command) == CD){
+	const char * const path = argv[1];
+	if (chdir(path) == -1){
+	    printf("chdir failed\n");
+	    system("pwd");
+	}else{
+	    printf("\n made it here \n");
+	    system("pwd");
+	}
+    }
+
+    if (isBuiltInCommand(com->command) == HISTORY){
+	system("history | more");
+    }
     /*insert your code here.*/
 
     free_info(info);
     free(cmdLine);
   }/* while(1) */
 }
-  
-
-
-
-
-
