@@ -71,7 +71,7 @@ int
 main (int argc, char **argv)
 {
 
-  
+  FILE *infile, *outfile;  
   char * cmdLine;
   parseInfo *info; /*info stores all the information returned by parser.*/
   struct commandType *com; /*com stores command name and Arg list for one command.*/
@@ -131,12 +131,20 @@ main (int argc, char **argv)
 	}
     }
 
-    if (isBuiltInCommand(com->command) == HISTORY){
+    infile = fopen(info->inFile, "r");
+    outfile = fopen(info->outFile, "w");
+    dup2(fileno(infile), 0);
+    dup2(fileno(outfile), 1);
+
+    close(fileno(infile));
+    close(fileno(outfile));
+
+
+/*    if (isBuiltInCommand(com->command) == HISTORY){
     
     	
 
-    }
-    /*insert your code here.*/
+    }*/
 
    _(info);
 
