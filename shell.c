@@ -5,6 +5,7 @@
 #include <readline/history.h>
 #include "parse.h"   /*include declarations for parse-related structs*/
 #include <unistd.h>
+#include <sys/types.h>
 
 enum
 BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY};
@@ -27,6 +28,18 @@ void printCWD(){
     }
 }
 
+
+void _ (parseInfo *info){
+    pid_t pid;
+
+    pid = fork();
+    if(pid == 0){
+	execvp(info->CommArray[0].command, info->CommArray[0].VarList);
+    }else{
+	wait(0);
+	printf("at parent function");	
+    }
+}
 
 char *
 buildPrompt()
@@ -101,9 +114,6 @@ main (int argc, char **argv)
       continue;
     }
 
-
-    execvp(com->command, com->VarList);
-
     /*com->command tells the command name of com*/
     if (isBuiltInCommand(com->command) == EXIT){
       exit(1);
@@ -118,17 +128,17 @@ main (int argc, char **argv)
 
 	if (chdir(path) == -1){
 	    printf("chdir failed\n");
-	    system("pwd");
-	}else{
-	    printf("\n made it here \n");
-	    system("pwd");
 	}
     }
 
     if (isBuiltInCommand(com->command) == HISTORY){
-	system("history | more");
+    
+    	
+
     }
     /*insert your code here.*/
+
+   _(info);
 
     free_info(info);
     free(cmdLine);
