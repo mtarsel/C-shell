@@ -114,7 +114,8 @@ main (int argc, char **argv)
     }
     
     if (isBuiltInCommand(com->command) == CD){
-	const char * const path = argv[1];
+	const char * const path = com->VarList[1];
+
 	if (chdir(path) == -1){
 	    printf("chdir failed\n");
 	    system("pwd");
