@@ -71,11 +71,15 @@ int
 main (int argc, char **argv)
 {
 
-  FILE *infile, *outfile;  
-  char * cmdLine;
-  parseInfo *info; /*info stores all the information returned by parser.*/
-  struct commandType *com; /*com stores command name and Arg list for one command.*/
+    FILE *infile, *outfile;  
+    int stdIN, stdOUT;
+    char * cmdLine;
+    parseInfo *info; /*info stores all the information returned by parser.*/
+    struct commandType *com; /*com stores command name and Arg list for one command.*/
 
+    stdIN = dup(fileno(stdin));
+    stdOUT = dup(fileno(stdout));
+    
 #ifdef UNIX
     fprintf(stdout, "This is the UNIX version\n");
 #endif
@@ -131,22 +135,29 @@ main (int argc, char **argv)
 	}
     }
 
-    infile = fopen(info->inFile, "r");
-    outfile = fopen(info->outFile, "w");
-    dup2(fileno(infile), 0);
-    dup2(fileno(outfile), 1);
+    if(strcmp(info->inFile,"")!=0){
+	infile = fopen(info->inFile, "r");
+	dup2(fileno(infile), 0);
+    }
+    
+    if(strcmp(info->outFile,"")!=0){
 
+	outfile = fopen(info->outFile, "w");
+	dup2(fileno(outfile), 1);
+    }
+
+    _(info);
     close(fileno(infile));
     close(fileno(outfile));
 
+    dup2(stdIN,0);
+    dup2(stdOUT,1);
 
 /*    if (isBuiltInCommand(com->command) == HISTORY){
     
     	
 
     }*/
-
-   _(info);
 
     free_info(info);
     free(cmdLine);
