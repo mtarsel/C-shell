@@ -31,13 +31,15 @@ void printCWD(){
 
 void _ (parseInfo *info){
     pid_t pid;
+    int status = 1;
 
     pid = fork();
     if(pid == 0){
 	execvp(info->CommArray[0].command, info->CommArray[0].VarList);
     }else{
-	wait(0);
-	printf("at parent function");	
+	waitpid(-1, &status, 0);
+/*	wait(pid);
+	printf("at parent function");*/
     }
 }
 
@@ -71,7 +73,8 @@ int
 main (int argc, char **argv)
 {
 
-    FILE *infile, *outfile;  
+    FILE *infile = NULL;
+    FILE *outfile = NULL;  
     int stdIN, stdOUT;
     char * cmdLine;
     parseInfo *info; /*info stores all the information returned by parser.*/
@@ -137,18 +140,32 @@ main (int argc, char **argv)
 
     if(strcmp(info->inFile,"")!=0){
 	infile = fopen(info->inFile, "r");
+/*	infile = open(inFile, O_RDONLY);*/
 	dup2(fileno(infile), 0);
     }
     
     if(strcmp(info->outFile,"")!=0){
 
 	outfile = fopen(info->outFile, "w");
+/*	outfile = open(outFile, O_WRONLY);*/
 	dup2(fileno(outfile), 1);
     }
 
     _(info);
-    close(fileno(infile));
-    close(fileno(outfile));
+    fflush(stdout);
+    fflush(stdin);
+    
+    
+    
+    if (infile != NULL){
+/*	close(fileno(infile));*/
+	fclose(infile);/* SEG FAULT*/
+    }
+    
+    if (outfile != NULL){
+	/*close(fileno(outfile));*/
+	fclose(outfile);/* SEG FAULT*/
+    }
 
     dup2(stdIN,0);
     dup2(stdOUT,1);
