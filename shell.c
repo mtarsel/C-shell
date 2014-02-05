@@ -10,6 +10,22 @@
 enum
 BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY};
 
+char history_Count;
+char history[100][20];
+
+
+void display_history(){
+
+    int i = 0;
+
+    while(history[i][0] != '\0')
+    {
+	printf("%d  %s\n", i+1, *(history + i));
+	i++;
+    }
+
+}
+
 /*prints current working directory*/
 void printCWD(){
 
@@ -76,6 +92,7 @@ main (int argc, char **argv)
     FILE *infile = NULL;
     FILE *outfile = NULL;  
     int stdIN, stdOUT;
+    int i =0;
     char * cmdLine;
     parseInfo *info; /*info stores all the information returned by parser.*/
     struct commandType *com; /*com stores command name and Arg list for one command.*/
@@ -138,6 +155,16 @@ main (int argc, char **argv)
 	}
     }
 
+    while(history[i][0] != '\0'){
+	i++;
+    }
+    
+    strcpy(history[i], com->VarList[0]);
+    history_Count++;
+
+
+
+
     if(strcmp(info->inFile,"")!=0){
 	infile = fopen(info->inFile, "r");
 /*	infile = open(inFile, O_RDONLY);*/
@@ -159,22 +186,23 @@ main (int argc, char **argv)
     
     if (infile != NULL){
 /*	close(fileno(infile));*/
-	fclose(infile);/* SEG FAULT*/
+	fclose(infile);
     }
     
     if (outfile != NULL){
 	/*close(fileno(outfile));*/
-	fclose(outfile);/* SEG FAULT*/
+	fclose(outfile);
     }
 
     dup2(stdIN,0);
     dup2(stdOUT,1);
 
-/*    if (isBuiltInCommand(com->command) == HISTORY){
-    
-    	
+    if (isBuiltInCommand(com->command) == HISTORY){
+	
+	display_history();
+       	printf("\nMADE IT NUKKa\n");
 
-    }*/
+    }
 
     free_info(info);
     free(cmdLine);
