@@ -97,7 +97,8 @@ main (int argc, char **argv)
     FILE *infile = NULL;
     FILE *outfile = NULL;  
     int stdIN, stdOUT;
-    int i =0;
+    int history_index = 0;
+    int history_reference = 0;
     char * cmdLine;
     parseInfo *info; /*info stores all the information returned by parser.*/
     struct commandType *com; /*com stores command name and Arg list for one command.*/
@@ -166,7 +167,6 @@ main (int argc, char **argv)
 
     if(strncmp(com->command, "!", strlen("!")) == 0){
 	char *tmp;
-	int history_reference = 0;
 	tmp = strtok(com->command,"!");
 	history_reference = atoi(tmp);
 	if (history_reference <= 0){
@@ -176,11 +176,11 @@ main (int argc, char **argv)
     }
 
 /*Save commands into history array*/
-    while(history[i][0] != '\0'){
-	i++;
+    while(history[history_index][0] != '\0'){
+	history_index++;
     }
 
-    strcpy(history[i], com->VarList[0]);/*TODO*/
+    strcpy(history[history_index], com->VarList[0]);/*TODO*/
     history_Count++;
 
     if(strcmp(info->inFile,"")!=0){
