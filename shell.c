@@ -164,6 +164,17 @@ main (int argc, char **argv)
 	display_history();
     }
 
+    if(strncmp(com->command, "!", strlen("!")) == 0){
+	char *tmp;
+	int history_reference = 0;
+	tmp = strtok(com->command,"!");
+	history_reference = atoi(tmp);
+	if (history_reference <= 0){
+	    printf("\n ERROR: invalid character:%s",tmp);
+	} 
+	printf("\nGot ya, %d \n", history_reference);
+    }
+
 /*Save commands into history array*/
     while(history[i][0] != '\0'){
 	i++;
