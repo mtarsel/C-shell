@@ -27,10 +27,15 @@ void display_history(){
 }
 
 /*prints current working directory*/
-void printCWD(){
+void printPrompt(){
 
     char cwd[256];
-
+    char *username=getenv("USER"); 
+    
+    char hostname[1024];
+    
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
 /*to change directory and test cwd, use this snippet:
     if(chdir("/tmp") != ){ //On success 0 is returned    
 	perror("chdir() ain't workin mann");
@@ -39,7 +44,7 @@ void printCWD(){
     if (getcwd(cwd, sizeof(cwd)) == NULL){
 	perror("getcwd() ain't workin dudeee");
     }else{
-	printf("%s", cwd);
+	printf("%s@%s %s ", username, hostname, cwd);
  
     }
 }
@@ -62,8 +67,8 @@ void _ (parseInfo *info){
 char *
 buildPrompt()
 {
-    printCWD(); 
-    return  "%";
+    printPrompt();
+    return  "$";
 }
  
 int
@@ -154,27 +159,27 @@ main (int argc, char **argv)
 	    printf("chdir failed\n");
 	}
     }
+    
+    if (isBuiltInCommand(com->command) == HISTORY){
+	display_history();
+    }
 
+/*Save commands into history array*/
     while(history[i][0] != '\0'){
 	i++;
     }
-    
-    strcpy(history[i], com->VarList[0]);
+
+    strcpy(history[i], com->VarList[0]);/*TODO*/
     history_Count++;
-
-
-
 
     if(strcmp(info->inFile,"")!=0){
 	infile = fopen(info->inFile, "r");
-/*	infile = open(inFile, O_RDONLY);*/
 	dup2(fileno(infile), 0);
     }
     
     if(strcmp(info->outFile,"")!=0){
 
 	outfile = fopen(info->outFile, "w");
-/*	outfile = open(outFile, O_WRONLY);*/
 	dup2(fileno(outfile), 1);
     }
 
@@ -182,27 +187,16 @@ main (int argc, char **argv)
     fflush(stdout);
     fflush(stdin);
     
-    
-    
     if (infile != NULL){
-/*	close(fileno(infile));*/
 	fclose(infile);
     }
     
     if (outfile != NULL){
-	/*close(fileno(outfile));*/
 	fclose(outfile);
     }
 
     dup2(stdIN,0);
     dup2(stdOUT,1);
-
-    if (isBuiltInCommand(com->command) == HISTORY){
-	
-	display_history();
-       	printf("\nMADE IT NUKKa\n");
-
-    }
 
     free_info(info);
     free(cmdLine);
