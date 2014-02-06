@@ -171,7 +171,9 @@ main (int argc, char **argv)
 	history_reference = atoi(tmp);
 	if (history_reference <= 0){
 	    printf("\n ERROR: invalid character:%s",tmp);
-	} 
+	}
+
+	 
 	printf("\nGot ya, %d \n", history_reference);
     }
 
