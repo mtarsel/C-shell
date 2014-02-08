@@ -26,6 +26,33 @@ void display_history(){
 
 }
 
+
+void backgroundjobs(){
+    
+    char  *pArgs[10];
+    int background;
+    pid_t pid;
+    int status;
+
+    if (strlen(pArgs[0]) > 1) {
+	pid = fork();
+	if (pid == -1) {
+	    perror("fork");
+	    exit(1);
+	} else if (pid == 0) {
+	    execvp(pArgs[0], pArgs);
+	    exit(1);
+	} else if (!background) {
+	    pid = waitpid(pid, &status, 0);
+	    if (pid > 0)
+		printf("waitpid reaped child pid %d\n", pid);
+	}
+    }
+
+
+}
+
+
 /*prints current working directory*/
 void printPrompt(){
 
@@ -146,7 +173,9 @@ main (int argc, char **argv)
 
     /*com->command tells the command name of com*/
     if (isBuiltInCommand(com->command) == EXIT){
-      exit(1);
+	fflush(stdout);
+	fflush(stdin);
+	exit(1);
     }
     
     if (isBuiltInCommand(com->command) == JOBS){
@@ -173,8 +202,17 @@ main (int argc, char **argv)
 	    printf("\n ERROR: invalid character:%s",tmp);
 	}
 
-	 
-	printf("\nGot ya, %d \n", history_reference);
+/*	cmdLine = history[history_reference-1];*/
+    
+
+	printf("\nCommand, %s \n", history[history_reference-1]);
+    }
+
+
+    if(strncmp(com->command, "&", strlen("&")) == 0){
+
+	backgroundjobs();
+
     }
 
 /*Save commands into history array*/
@@ -182,7 +220,7 @@ main (int argc, char **argv)
 	history_index++;
     }
 
-    strcpy(history[history_index], com->VarList[0]);/*TODO*/
+    strcpy(history[history_index], com->command);/*TODO*/
     history_Count++;
 
     if(strcmp(info->inFile,"")!=0){
