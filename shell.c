@@ -6,9 +6,11 @@
 #include "parse.h"   /*include declarations for parse-related structs*/
 #include <unistd.h>
 #include <sys/types.h>
+#include <signal.h>
+
 
 enum
-BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY};
+BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY, KILL};
 
 char history_Count;
 char history[100][20];
@@ -27,7 +29,7 @@ void display_history(){
 }
 
 
-void backgroundjobs(){
+void makebackgroundjobs(){
     
     char  *pArgs[10];
     int background;
@@ -109,6 +111,9 @@ isBuiltInCommand(char * cmd){
   }
   if ( strncmp(cmd, "cd", strlen("cd")) == 0){
     return CD;
+  }
+  if ( strncmp(cmd, "kill", strlen("kill")) == 0){
+    return KILL;
   }
   if ( strncmp(cmd, "history", strlen("history")) == 0){
     return HISTORY;
@@ -194,6 +199,25 @@ main (int argc, char **argv)
 	display_history();
     }
 
+
+    if (isBuiltInCommand(com->command) == KILL){
+	
+	const char * const path = com->VarList[1];
+	int kill_pid = 0;
+
+	kill_pid = atoi(com->VarList[1]);
+	
+	if(kill_pid <= 0){
+	    printf("\nInvalid pid:%d\n", kill_pid);
+	}else{
+	    kill(kill_pid, SIGKILL);
+	}
+    
+    }
+
+
+/*check if command has a ! to check history. Also implemenets 
+error checking*/
     if(strncmp(com->command, "!", strlen("!")) == 0){
 	char *tmp;
 	tmp = strtok(com->command,"!");
@@ -202,18 +226,18 @@ main (int argc, char **argv)
 	    printf("\n ERROR: invalid character:%s",tmp);
 	}
 
-/*	cmdLine = history[history_reference-1];*/
+/*	cmdLine = history[history_reference-1]; TODO*/
     
 
-	printf("\nCommand, %s \n", history[history_reference-1]);
+	printf("\nCommand: %s \n", history[history_reference-1]);
     }
 
 
+/*check if command contains & anywhere */
     if(strncmp(com->command, "&", strlen("&")) == 0){
-
-	backgroundjobs();
-
+	makebackgroundjobs();
     }
+
 
 /*Save commands into history array*/
     while(history[history_index][0] != '\0'){
