@@ -12,18 +12,30 @@
 enum
 BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY, KILL};
 
-char history_Count;
+char Global_history_count;
+char Global_jobs_count;
 char history[100][20];
+char jobs[100][20];
 
 
 void display_history(){
 
     int i = 0;
 
-    while(history[i][0] != '\0')
-    {
+    while(history[i][0] != '\0'){
 	printf("%d  %s\n", i+1, *(history + i));
-	i++;
+	++i;
+    }
+
+}
+
+void display_jobs(){
+    int i = 0;
+   
+    if(jobs[i][0] != '\0'){
+	printf("\n fuckin made it \n");
+	printf("%d %s\n", i+1, *(jobs + i));
+	++i;
     }
 
 }
@@ -130,11 +142,12 @@ main (int argc, char **argv)
     FILE *outfile = NULL;  
     int stdIN, stdOUT;
     int history_index = 0;
+    int jobs_index = 0;
     int history_reference = 0;
     char * cmdLine;
     parseInfo *info; /*info stores all the information returned by parser.*/
     struct commandType *com; /*com stores command name and Arg list for one command.*/
-
+    
     stdIN = dup(fileno(stdin));
     stdOUT = dup(fileno(stdout));
     
@@ -176,6 +189,8 @@ main (int argc, char **argv)
       continue;
     }
 
+
+
     /*com->command tells the command name of com*/
     if (isBuiltInCommand(com->command) == EXIT){
 	fflush(stdout);
@@ -184,7 +199,7 @@ main (int argc, char **argv)
     }
     
     if (isBuiltInCommand(com->command) == JOBS){
-	system("ps -aux | more");
+	display_jobs();
     }
     
     if (isBuiltInCommand(com->command) == CD){
@@ -233,19 +248,33 @@ error checking*/
     }
 
 
-/*check if command contains & anywhere */
+    /*check if command contains & anywhere */
     if(strncmp(com->command, "&", strlen("&")) == 0){
+
+	printf("com->command:%s", com->command);
+	
+	/*Save commands into jobs array if contains &*/
+	strcpy(jobs[jobs_index], com->command);
+	++Global_jobs_count;
+	
 	makebackgroundjobs();
     }
 
 
-/*Save commands into history array*/
     while(history[history_index][0] != '\0'){
 	history_index++;
+	
+	/*if(strncmp(com->command, "&", strlen("&")) == 0){
+	    strcpy(jobs[jobs_index], com->command);
+	    ++Global_jobs_count;
+	} */   
+
+
     }
 
-    strcpy(history[history_index], com->command);/*TODO*/
-    history_Count++;
+    /*Save commands into history array*/
+    strcpy(history[history_index], com->command);/*TODO only saves first arg*/
+    Global_history_count++;
 
     if(strcmp(info->inFile,"")!=0){
 	infile = fopen(info->inFile, "r");
