@@ -9,8 +9,7 @@
 #include <signal.h>
 
 
-enum
-BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY, KILL};
+enum BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, HISTORY, KILL, HELP};
 
 char Global_history_count;
 char Global_jobs_count;
@@ -26,7 +25,6 @@ void display_history(){
 	printf("%d  %s\n", i+1, *(history + i));
 	++i;
     }
-
 }
 
 void display_jobs(){
@@ -78,10 +76,6 @@ void printPrompt(){
     
     hostname[1023] = '\0';
     gethostname(hostname, 1023);
-/*to change directory and test cwd, use this snippet:
-    if(chdir("/tmp") != ){ //On success 0 is returned    
-	perror("chdir() ain't workin mann");
-    } */
  
     if (getcwd(cwd, sizeof(cwd)) == NULL){
 	perror("getcwd() ain't workin dudeee");
@@ -130,6 +124,9 @@ isBuiltInCommand(char * cmd){
   }
   if ( strncmp(cmd, "history", strlen("history")) == 0){
     return HISTORY;
+  }
+  if ( strncmp(cmd, "help", strlen("help")) == 0){
+    return HELP;
   }
   return NO_SUCH_BUILTIN;
 }
@@ -207,8 +204,6 @@ main (int argc, char **argv)
 
     /*com->command tells the command name of com*/
     if (isBuiltInCommand(com->command) == EXIT){
-/*	fflush(stdout);
-	fflush(stdin);*/
 	if(background_pid != 0){
 	    printf("\nCANNOT EXIT\n");
 	    printf("\nProcess: %d is still running\n", background_pid);
@@ -223,6 +218,7 @@ main (int argc, char **argv)
     }
     
     if (isBuiltInCommand(com->command) == CD){
+	
 	const char * const path = com->VarList[1];
 
 	if (chdir(path) == -1){
@@ -250,6 +246,18 @@ main (int argc, char **argv)
     
     }
 
+    if (isBuiltInCommand(com->command) == HELP){
+        printf("help: prints this help screen.\n\n");
+        printf(" jobs - prints out the list of running background jobs.\n\n");
+        printf(" kill [process_id] - kills background process_id to kill a running background job.\n\n");
+        printf(" history - display a record of the last 100 commands typed.\n\n");
+        printf(" ![int] - execute [int] command in history array\n\n");
+        printf(" cd [location] - change directory\n\n");
+        printf(" sometext < infile.txt > outfile.txt - create a new process to run sometext and assign STDIN for the new process to infile and STDOUT for the new process to outfile\n\n");
+        printf(" exit - exit or quit shell.\n\n");
+        printf("Append & to the end of any command to run it in the background.\n\n");
+
+    }
 
 /*check if command has a ! to check history. Also implemenets 
 error checking*/

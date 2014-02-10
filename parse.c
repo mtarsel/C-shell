@@ -162,7 +162,7 @@ void print_info (parseInfo *info) {
     printf("Null info\n");
     return;
   }
-  printf("Parse struct:\n\n");
+/*  printf("Parse struct:\n\n");
   printf("# of pipes:%d\n", info->pipeNum);
   for (i=0; i<=info->pipeNum;i++) {
     comm=&(info->CommArray[i]);
@@ -192,7 +192,7 @@ void print_info (parseInfo *info) {
     printf("Background process.\n");
   } else {
     printf("Foreground process.\n");
-  }
+  }*/
 }
  
 void free_info (parseInfo *info) {
