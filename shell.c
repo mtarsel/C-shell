@@ -16,7 +16,7 @@ char Global_history_count;
 char Global_jobs_count;
 char history[100][20];
 char jobs[100][20];
-
+pid_t background_pid;
 
 void display_history(){
 
@@ -33,33 +33,36 @@ void display_jobs(){
     int i = 0;
    
     if(jobs[i][0] != '\0'){
-	printf("\n fuckin made it \n");
 	printf("%d %s\n", i+1, *(jobs + i));
 	++i;
+    }else{
+	printf("\n No background jobs \n");
     }
 
 }
 
+int isBackgroundJob(parseInfo * info){
+        return info->boolBackground;
+}
 
 void makebackgroundjobs(){
     
     char  *pArgs[10];
     int background;
-    pid_t pid;
     int status;
 
     if (strlen(pArgs[0]) > 1) {
-	pid = fork();
-	if (pid == -1) {
+	background_pid = fork();
+	if (background_pid == -1) {
 	    perror("fork");
 	    exit(1);
-	} else if (pid == 0) {
+	} else if (background_pid == 0) {
 	    execvp(pArgs[0], pArgs);
 	    exit(1);
 	} else if (!background) {
-	    pid = waitpid(pid, &status, 0);
-	    if (pid > 0)
-		printf("waitpid reaped child pid %d\n", pid);
+	    background_pid = waitpid(background_pid, &status, 0);
+	    if (background_pid > 0)
+		printf("waitpid child pid %d\n", background_pid);
 	}
     }
 }
@@ -169,6 +172,21 @@ main (int argc, char **argv)
 #endif
 
     /*insert your code about history and !x !-x here*/
+/*    if(strncmp(com->command, "!", strlen("!")) == 0){
+	char *tmp;
+	tmp = strtok(com->command,"!");
+	history_reference = atoi(tmp);
+	if (history_reference <= 0){
+	    printf("\n ERROR: invalid character:%s",tmp);
+	}
+
+	printf("\nCommand: %s \n", history[history_reference-1]);
+	free(cmdLine);
+	cmdLine = (char *) malloc(strlen(history[history_reference]+1));
+	strcpy(cmdLine, history[history_reference-1]); 
+
+	printf("\nCommand: %s \n", history[history_reference-1]);
+    }*/
 
     /*calls the parser*/
     info = parse(cmdLine);
@@ -187,13 +205,17 @@ main (int argc, char **argv)
       continue;
     }
 
-
-
     /*com->command tells the command name of com*/
     if (isBuiltInCommand(com->command) == EXIT){
-	fflush(stdout);
-	fflush(stdin);
-	exit(1);
+/*	fflush(stdout);
+	fflush(stdin);*/
+	if(background_pid != 0){
+	    printf("\nCANNOT EXIT\n");
+	    printf("\nProcess: %d is still running\n", background_pid);
+	    continue;	
+	}else{
+	    exit(0);
+	}
     }
     
     if (isBuiltInCommand(com->command) == JOBS){
@@ -238,37 +260,34 @@ error checking*/
 	if (history_reference <= 0){
 	    printf("\n ERROR: invalid character:%s",tmp);
 	}
-
-/*	cmdLine = history[history_reference-1]; TODO*/
-    
-
+	strcpy(cmdLine, history[history_reference-1]); 
 	printf("\nCommand: %s \n", history[history_reference-1]);
     }
 
 
     /*check if command contains & anywhere */
-    if(strncmp(com->command, "&", strlen("&")) == 0){
+    /*if(strncmp(com->command, "&", strlen("&")) == 0){*/
+    
+    if(isBackgroundJob(info)){ 
+    /*record in an array of background jobs*/
+        char * previous_command;
+        previous_command = (char*)com->command;
+        printf("%s\n", previous_command);
+    
+	while(jobs[jobs_index][0] != '\0'){
+	    jobs_index++;
+	}
 
-	printf("com->command:%s", com->command);
-	
-	/*Save commands into jobs array if contains &*/
-	strcpy(jobs[jobs_index], com->command);
-	++Global_jobs_count;
-
-	printf("\n jobs array: %s\n", jobs[jobs_index]);
-	makebackgroundjobs();
+        strcpy(jobs[jobs_index], cmdLine);
+        ++Global_jobs_count;
+        printf("\n jobs array: %s\n", jobs[jobs_index]);
+        makebackgroundjobs();
+        
     }
 
 
     while(history[history_index][0] != '\0'){
 	history_index++;
-	
-	/*if(strncmp(com->command, "&", strlen("&")) == 0){
-	    strcpy(jobs[jobs_index], com->command);
-	    ++Global_jobs_count;
-	} */   
-
-
     }
 
     /*Save commands into history array*/
