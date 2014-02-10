@@ -62,8 +62,6 @@ void makebackgroundjobs(){
 		printf("waitpid reaped child pid %d\n", pid);
 	}
     }
-
-
 }
 
 
@@ -256,7 +254,8 @@ error checking*/
 	/*Save commands into jobs array if contains &*/
 	strcpy(jobs[jobs_index], com->command);
 	++Global_jobs_count;
-	
+
+	printf("\n jobs array: %s\n", jobs[jobs_index]);
 	makebackgroundjobs();
     }
 
@@ -273,7 +272,7 @@ error checking*/
     }
 
     /*Save commands into history array*/
-    strcpy(history[history_index], com->command);/*TODO only saves first arg*/
+    strcpy(history[history_index], cmdLine);
     Global_history_count++;
 
     if(strcmp(info->inFile,"")!=0){
