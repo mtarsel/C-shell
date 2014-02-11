@@ -1,4 +1,4 @@
-CS444-shell
+C-shell
 ===========
 
 Type help for more info.
